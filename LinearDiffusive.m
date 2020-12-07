@@ -1,7 +1,7 @@
 % Driving Parameters
 numxpoints = 101;
 xes = [0 8];
-ts = [1 50];
+ts = [1 10];
 
 x = xes(1):xes(2);
 t = ts(1):ts(2);
@@ -9,6 +9,7 @@ t = ts(1):ts(2);
 y = [0 6 2 2 1 1 1 0.5 0];
 xx = linspace(xes(1),xes(2),numxpoints);
 
+%% Linear Diffusive
 %%% h(x)
 %TODO: Use Mary's distance data to fit a more accurate h(x) function
 rho = -0.9478;
@@ -16,7 +17,7 @@ sigma = 8.9149;
 h = -(x - rho).*(x - sigma);
 
 %%% r(t)
-Beta = 0.0019;
+Beta = 0.0059;
 alpha = 1.5526;
 gamma = 0.078;
 delta = 0.002;
@@ -57,7 +58,36 @@ xlabel("x Distance");
 ylabel("t Time");
 zlabel("z Density");
 title("Linear Diffusive Information Diffusion");
-zlim([0 100])
+zlim([0 30])
+
+%% Logistical
+d = 0.002;
+r = 0.4;
+K = 25;
+f1= ones(1,xes(2)+1);
+flat = spline(x,f1);
+
+Ispline = I_initial;
+for t_i = t
+    Z(t_i,:) = ppval(Ispline,xx);
+%     I_t = delta * ppval(fnder(Ispline,2),x) + prod(t_i,:).*ppval(Ispline,x);
+%     I_t = spline(x,[0 0 I_t(2:xes(2)) 0 0]);
+    vals = ppval(Ispline,xx);
+    ik = spline(xx,((1-vals./K).*vals).*r);
+    ixx = fncmb(fnder(Ispline,2),delta);
+    I_t = fncmb(ixx,'+',...
+        ik ... (1-I/K)
+        );
+    Ispline = fncmb(I_t,'+',Ispline);
+end
+
+figure(3);
+mesh(X,Y,Z,'FaceAlpha','0.5','FaceColor','flat')
+xlabel("x Distance");
+ylabel("t Time");
+zlabel("z Density");
+title("Logistical Diffusive Information Diffusion");
+zlim([0 30])
 
 
 %%% Debugging Stuff: Uncomment if you want to see each individual spline
@@ -77,7 +107,7 @@ zlim([0 100])
 % I4s = spline(x,[0 0 I4(2:xes(2)) 0 0]);
 % I4s = fncmb(I4s,'+',I3s);
 % 
-% figure(3);
+% figure(4);
 % plot(x,y,'o',xx,ppval(I_initial,xx),'-',xx,ppval(I2s,xx),'-',xx,ppval(I2ss,xx),'-',xx,ppval(I3s,xx),'-' ...
 %     ,xx,ppval(I4s,xx),'-',xx,ppval(prspline,xx),'-');
 % legend("points","I", "I2s","I2ss", "I3s", "I4s", "prspline");

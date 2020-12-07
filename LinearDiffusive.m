@@ -111,4 +111,3 @@ zlim([0 30])
 % plot(x,y,'o',xx,ppval(I_initial,xx),'-',xx,ppval(I2s,xx),'-',xx,ppval(I2ss,xx),'-',xx,ppval(I3s,xx),'-' ...
 %     ,xx,ppval(I4s,xx),'-',xx,ppval(prspline,xx),'-');
 % legend("points","I", "I2s","I2ss", "I3s", "I4s", "prspline");
-

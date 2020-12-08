@@ -32,7 +32,7 @@ populations = [1 259 49014 1126905 2052095 2170024 2194024 2199247 2200477]; % N
 
 Z = bsxfun(@rdivide,Z, populations);
 
-m = mesh(X,Y,Z,'FaceAlpha','0.5','FaceColor','red');
+m = mesh(X,Y,Z,'FaceAlpha','0.5','FaceColor','flat');
 set(gca,'ZScale','log');
 xlabel("x Friend Distance"); ylabel("t Hour"); zlabel("z Global Density");
-title("714 Votes");
+title("Story 714 Density");

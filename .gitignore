@@ -1,5 +1,6 @@
 # for mary's icloud
 .nosync
+*.m~
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

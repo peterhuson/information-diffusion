@@ -9,14 +9,21 @@ t = ts(1):ts(2);
 % Initial condition
 %%% Susceptible starts out with all people (density of 1)
 %%% Infected starts out with 1 person (density of 1/N)
-N = 1000; % Just an arbitrary population size.
+N = 12070; % Just an arbitrary population size.
 %y_sus = [0 N-1 N-4 N-94 N-171 N-181 N-183 N-183 N-184]; % one hour into the spread; create some sort of smooth dist
 %y_inf = [0 1 4 94 171 181 183 183 184];
 
-y_sus = [ 1 4 94 171 181 183 183 183];
-%y_sus = [0 1 5 99 270 451 634 817 1000];
-y_inf = [ 10 20 10 10 10 10 10 10];
+% 12,070
+% y_sus = [ 1 4 94 171 181 183 183 183];
 
+y_sus = [ 12 48 1135 2064 2185 2209 2209 2209];
+
+y_sus = [ 1508 1508 1508 1508 1508 1508 1508 1508];
+
+
+%y_sus = [0 1 5 99 270 451 634 817 1000];
+y_inf = [ 1 1 1 1 1 1 1 1];
+% y_inf = [55 234 1506 661 117 20 8 2]; 
 xx = linspace(xes(1),xes(2),numxpoints);
 
 
@@ -24,8 +31,8 @@ xx = linspace(xes(1),xes(2),numxpoints);
 beta = 5.14; %0.000008; %just a guess.. need to know average links between people in the network
 
 %%% diffusion constant
-delta_I = 0.02;
-delta_S = 0.005;
+delta_I = 0;
+delta_S = 0;
 
 
 % The key to this implementation is that you can easily take the derivative
@@ -73,7 +80,7 @@ end
 
 fnplt(Sspline)
 
-% Normalize density between 0 and 1
+% Normalize density between 0 and 1 (plz work)
 norm_Z_sus = Z_sus - min(Z_sus(:));
 norm_Z_sus = norm_Z_sus./ max(norm_Z_sus(:));
 

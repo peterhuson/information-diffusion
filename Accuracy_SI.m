@@ -32,7 +32,7 @@ populations = [1 259 49014 1126905 2052095 2170024 2194024 2199247 2200477]; % N
 % [259 49014 1126905 2052095 2170024 2194024 2199247 2200477]
 % Z = bsxfun(@rdivide,Z, populations);
 
-Z(ts(2),:)
+Z(ts(1),:)
 
 % Normalize by the final number of exposed people:
 final_votes = Z(ts(2),:);

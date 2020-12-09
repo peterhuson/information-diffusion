@@ -1,3 +1,10 @@
+% import ('relError.m')
+
+% populations = readmatrix("digg2009/votes_714.csv");
+
+
+populations = [1557 346744 1641109 1937290 2003317 2018062 2021615 2022430];
+populations = [populations(1) diff(populations)];
 % Driving Parameters
 numxpoints = 101;
 xes = [1 8];
@@ -9,19 +16,34 @@ t = ts(1):ts(2);
 % Initial condition
 %%% Susceptible starts out with all people (density of 1)
 %%% Infected starts out with 1 person (density of 1/N)
-N = 1000; % Just an arbitrary population size.
+% N = 1000; % Just an arbitrary population size.
+N = 24099
 %y_sus = [0 N-1 N-4 N-94 N-171 N-181 N-183 N-183 N-184]; % one hour into the spread; create some sort of smooth dist
 %y_inf = [0 1 4 94 171 181 183 183 184];
 
-y_sus = [ 1 4 94 171 181 183 183 183];
+% y_sus = [ 1 4 94 171 181 183 183 183]; % old
+
+% y_sus = [1557 346744 1641109 1937290 2003317 2018062 2021615 2022430]
+% y_sus = [populations(1) diff(populations)];
+% y_sus = [y_sus(1:end-1)];
+
+y_sus = [0.93513166 0.99838498 0.99933886 0.99982295 0.99996206 0.99999108 0.99999901 1]
+y_sus = y_sus .* 10000
+y_inf = [101 560 1085 343 76 18 2 0];
+% y_sus = y_sus - y_inf;
+
+N = sum(y_sus);
+
+
 %y_sus = [0 1 5 99 270 451 634 817 1000];
-y_inf = [ 10 20 10 10 10 10 10 10];
+% y_inf = [ 1 20  10 10 10 10 10 10]; %old 
+
 
 xx = linspace(xes(1),xes(2),numxpoints);
 
 
 %%% beta (transmission coefficient)
-beta = 5.14; %0.000008; %just a guess.. need to know average links between people in the network
+beta = 15.14; %0.000008; %just a guess.. need to know average links between people in the network
 
 %%% diffusion constant
 delta_I = 0.02;
@@ -80,10 +102,13 @@ norm_Z_sus = norm_Z_sus./ max(norm_Z_sus(:));
 norm_Z_inf = Z_inf - min(Z_inf(:));
 norm_Z_inf = norm_Z_inf./ max(norm_Z_inf(:));
 
+Z_sus
+% Z_sus = Z_sus ./ populations
+
 % Graph the susceptible and infected
-mesh(X,Y,norm_Z_sus,'FaceAlpha','0.5','FaceColor','green')
+mesh(X,Y,Z_sus,'FaceAlpha','0.5','FaceColor','green')
 hold on
-mesh(X,Y,norm_Z_inf,'FaceAlpha','0.5','FaceColor','red')
+mesh(X,Y,Z_inf,'FaceAlpha','0.5','FaceColor','red')
 xlabel("x Distance");
 ylabel("t Time");
 zlabel("z Density");
@@ -95,16 +120,22 @@ lgd.FontSize = 14;
 
 Z = readmatrix('Accuracy.txt');
 
-Accuracy = 0;
+Error = 0;
 
 Z(1,2)
 %|approx - exact| / exact 
 
-for t = 1:length(Z)
-    for d = 1:8
-        abs(norm_Z_inf(t,d) - Z(t,d))
-        Accuracy = Accuracy + abs(norm_Z_inf(t,d) - Z(t,d))/Z(t,d);
-    end
-end
+% for t = 2:length(Z)
+%     for d = 1:8
+% %         abs(norm_Z_inf(t,d) - Z(t,d))
+%         Error = Error + abs(norm_Z_inf(t,d) - Z(t,d))/Z(t,d)
+%     end
+% end
+% 
+% Error
 
-% Accura
+% relError(Z_inf, Z)
+% 
+% deltaSignal = abs(norm_Z_inf - Z);
+% percentageDifference = norm_Z_inf ./ Z; % Percent by element.
+% meanPctDiff = mean(percentageDifference); % Average percentage over all elements.

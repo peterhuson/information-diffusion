@@ -6,9 +6,9 @@
 populations = [1557 346744 1641109 1937290 2003317 2018062 2021615 2022430];
 populations = [populations(1) diff(populations)];
 % Driving Parameters
-numxpoints = 101;
+numxpoints = 8;
 xes = [1 8];
-ts = [1 15];
+ts = [1 50];
 
 x = xes(1):xes(2);
 t = ts(1):ts(2);
@@ -17,7 +17,7 @@ t = ts(1):ts(2);
 %%% Susceptible starts out with all people (density of 1)
 %%% Infected starts out with 1 person (density of 1/N)
 % N = 1000; % Just an arbitrary population size.
-N = 24099
+% N = 24099;
 %y_sus = [0 N-1 N-4 N-94 N-171 N-181 N-183 N-183 N-184]; % one hour into the spread; create some sort of smooth dist
 %y_inf = [0 1 4 94 171 181 183 183 184];
 
@@ -27,10 +27,16 @@ N = 24099
 % y_sus = [populations(1) diff(populations)];
 % y_sus = [y_sus(1:end-1)];
 
-y_sus = [0.93513166 0.99838498 0.99933886 0.99982295 0.99996206 0.99999108 0.99999901 1]
-y_sus = y_sus .* 10000
-y_inf = [101 560 1085 343 76 18 2 0];
-% y_sus = y_sus - y_inf;
+y_sus = [0.93513166 0.99838498 0.99933886 0.99982295 0.99996206 0.99999108 0.99999901 1];
+% y_sus = y_sus .* 10000
+y_sus = exp(y_sus)
+% y_inf = [648.6833654464 16.1502434072 6.6113829124 1.7705144816 0.3793708135 0.0891944846 0.0098930805 0.0]
+
+y_inf = [1.350662534142069 1.241994141180107 1.209190322169032 1.203465346130819 1.202576116353606 1.199396102035386 1.083287067674959 1.0];
+
+y_sus = exp(1 - log(y_inf));
+% y_inf = [1.06701853 1.00161633 1.00066136 1.00017707 1.00003794 1.00000892 1.00000099 1];
+
 
 N = sum(y_sus);
 
@@ -43,11 +49,11 @@ xx = linspace(xes(1),xes(2),numxpoints);
 
 
 %%% beta (transmission coefficient)
-beta = 15.14; %0.000008; %just a guess.. need to know average links between people in the network
+beta = 0.4; %0.000008; %just a guess.. need to know average links between people in the network
 
 %%% diffusion constant
-delta_I = 0.02;
-delta_S = 0.005;
+delta_I = 0.001;
+delta_S = 0.001;
 
 
 % The key to this implementation is that you can easily take the derivative
@@ -109,6 +115,13 @@ Z_sus
 mesh(X,Y,Z_sus,'FaceAlpha','0.5','FaceColor','green')
 hold on
 mesh(X,Y,Z_inf,'FaceAlpha','0.5','FaceColor','red')
+hold on
+
+Z = readmatrix('Accuracy.txt');
+X_data = readmatrix('X.txt');
+Y_data = readmatrix('Y.txt');
+
+mesh(X_data,Y_data,Z,'FaceAlpha','0.5','FaceColor','flat')
 xlabel("x Distance");
 ylabel("t Time");
 zlabel("z Density");
@@ -118,7 +131,7 @@ title('\fontsize{14}Susceptible and Infected Populations');
 lgd = legend('Susceptible', 'Infected');
 lgd.FontSize = 14;
 
-Z = readmatrix('Accuracy.txt');
+
 
 Error = 0;
 
@@ -134,7 +147,7 @@ Z(1,2)
 % 
 % Error
 
-% relError(Z_inf, Z)
+relError(Z_inf, Z)
 % 
 % deltaSignal = abs(norm_Z_inf - Z);
 % percentageDifference = norm_Z_inf ./ Z; % Percent by element.

@@ -1,93 +1,106 @@
+clear;
 % Driving Parameters
 numxpoints = 101;
-xes = [0 8];
-ts = [1 10];
+xes = [1 8];
+ts = [1 50];
 
 x = xes(1):xes(2);
 t = ts(1):ts(2);
 % Initial condition from paper i.e. \phi(x)
-y = [0 6 2 2 1 1 1 0.5 0];
+% y = [0 6 2 2 1 1 1 0.5 0];
+y = [101 560 1085 343 76 18 2 0];
+y3 = 1085;
 xx = linspace(xes(1),xes(2),numxpoints);
 
-%% Linear Diffusive
+% Linear Diffusive
 %%% h(x)
 %TODO: Use Mary's distance data to fit a more accurate h(x) function
 rho = -0.9478;
 sigma = 8.9149;
 h = -(x - rho).*(x - sigma);
+delta = 0.0001;
 
-%%% r(t)
-Beta = 0.0059;
-alpha = 1.5526;
-gamma = 0.078;
-delta = 0.002;
-asymptote = Beta / alpha;
-r = asymptote - exp(-alpha*(t - 1))*(asymptote - gamma);
-
-prod = r'*h;
-% Show growth mesh
-figure(1);
-[X_p, Y_p] = meshgrid(x,t);
-mesh(X_p,Y_p,prod,'FaceAlpha','0.5','FaceColor','flat')
-
-
-% The key to this implementation is that you can easily take the derivative
-% of a spline using `fnder()`
-I_initial = spline(x,[0 y 0]);
-
-% Mesh stuff
-[X, Y] = meshgrid(xx,t);
-Z = zeros(ts(2), numxpoints);
-xlabel("x Distance"); ylabel("t Time"); zlabel("z Growth");
-title("Growth Function");
-
-
-Ispline = I_initial;
-for t_i = t
-    Z(t_i,:) = ppval(Ispline,xx);
-%     I_t = delta * ppval(fnder(Ispline,2),x) + prod(t_i,:).*ppval(Ispline,x);
-%     I_t = spline(x,[0 0 I_t(2:xes(2)) 0 0]);
-    I_t = fncmb(fncmb(fnder(Ispline,2),delta),'+', ...
-        spline(xx,ppval(spline(x, prod(t_i,:)),xx).*ppval(Ispline,xx)));
-    Ispline = fncmb(I_t,'+',Ispline);
+% %%% r(t)
+% Beta = 0.00005;
+% alpha = 0.3526;
+bs = [0.00000:0.0002:0.002];
+bs = [0.0001];
+b_range = [1:numel(bs)];
+as = [0.1:0.2:4.5];
+as = [0.4428    ];
+a_range = [1:numel(as)];
+gs = [0.01:0.01:0.1]; % Fix a and iterate over g and B
+gs = [0.0283    ];
+g_range = [1:numel(gs)];
+[X_a, Y_a] = meshgrid(gs,bs);
+accuracy = zeros(numel(bs), numel(gs));
+a_i = 1;
+for b_i = b_range
+    for g_i = g_range
+        Beta = bs(b_i);
+        alpha = as(a_i);
+        gamma = gs(g_i);
+        accuracy(b_i, g_i) = LinearDiffusiveAccuracy(alpha,Beta,gamma,delta,rho,sigma,y3,true)
+    end
 end
-
-figure(2);
-mesh(X,Y,Z,'FaceAlpha','0.5','FaceColor','flat')
-xlabel("x Distance");
-ylabel("t Time");
-zlabel("z Density");
-title("Linear Diffusive Information Diffusion");
-zlim([0 30])
-
-%% Logistical
-d = 0.002;
-r = 0.4;
-K = 25;
-f1= ones(1,xes(2)+1);
-flat = spline(x,f1);
-
-Ispline = I_initial;
-for t_i = t
-    Z(t_i,:) = ppval(Ispline,xx);
-%     I_t = delta * ppval(fnder(Ispline,2),x) + prod(t_i,:).*ppval(Ispline,x);
-%     I_t = spline(x,[0 0 I_t(2:xes(2)) 0 0]);
-    vals = ppval(Ispline,xx);
-    ik = spline(xx,((1-vals./K).*vals).*r);
-    ixx = fncmb(fnder(Ispline,2),delta);
-    I_t = fncmb(ixx,'+',...
-        ik ... (1-I/K)
-        );
-    Ispline = fncmb(I_t,'+',Ispline);
-end
-
 figure(3);
-mesh(X,Y,Z,'FaceAlpha','0.5','FaceColor','flat')
-xlabel("x Distance");
-ylabel("t Time");
-zlabel("z Density");
-title("Logistical Diffusive Information Diffusion");
-zlim([0 30])
+accuracy
+% mesh(X_a,Y_a,accuracy,'FaceAlpha','0.5','FaceColor','flat')
+xlabel("x \gamma");
+ylabel("y \Beta");
+
+options = optimset('PlotFcns',@optimplotfval);
+fun = @(x)LinearDiffusiveAccuracy(x(1),x(2),x(3),x(4),x(5),x(6),x(7),true);
+
+x5 = [0.42,0.000086,0.041,0.00014,-0.5,7.39,1055.3]; % Final good run
+x6 = [0.413,0.000034,0.0181,-0.000042,-1.88,9.876,1093.3]; % 2.66 relative error
+x7 = [0.413049,0.000032,0.017005,-0.000052,-2.01397,10.1360,1094.79]; % 2.6642 relative error
+
+
+x,f = fminsearch(fun,x7,options)
+fun(f)
+dim = [0.7 0.65 .15 .2];
+str = sprintf('alpha=%.4f \n beta=%.5f \n gamma=%.3f \n d=%.5f \n rho=%.3f \n sigma=%.2f', f(1),f(2),f(3),f(4),f(5),f(6));
+annotation('textbox',dim,'String',str)
+
+% relError(Z_model, Z_digg)
+
+% Normalize by the total population of the digg data
+% populations = [259 49014 1126905 2052095 2170024 2194024 2199247 2200477]; % Number of people in each distance
+% populations = [259 49014 1126905 2052095 2170024 2194024 2199247 2200477]; % Number of people in each distance
+% populations = [359 99017 1214129 1885767 1990504 2014729 2020741 2022199]; 
+% populations = [1020 273388 1571443 1919342 1997461 2016886 2021359 2022396]; % Number of people in each distance
+populations = [1557 346744 1641109 1937290 2003317 2018062 2021615 2022430];
+populations = [populations(1) diff(populations)];
+% figure(1);
+% plot(x, populations(1:xes(2)));
+% [259 49014 1126905 2052095 2170024 2194024 2199247 2200477]
+% Z = bsxfun(@rdivide,Z,populations(1:xes(2)));
+
+% Normalize by the final number of exposed people:
+% final_votes = Z_digg(ts(2),:);
+% Z = bsxfun(@rdivide,Z, final_votes);
+
+% writematrix(Z, "Accuracy.txt")
+% m = mesh(X,Y,Z,[0 0 0],'LineStyle','--','FaceAlpha','0.2','EdgeAlpha','0','EdgeColor','white');%,'FaceColor','interp'
+% X = reshape(X.',1,[]);
+% Y = reshape(Y.',1,[]);
+% Z_digg = reshape(Z_digg.',1,[]);
+% figure(2);
+% m = scatter3(X,Y,Z_digg);%,'FaceColor','interp'
+
+hold off;
+%% Logistical
+
+
+options = optimset('PlotFcns',@optimplotfval);
+fun = @(x)LogisticalDiffusiveAccuracy(x(1),x(2),x(3),true);
+guess1 = [0.00001 0.062 7972];
+accuracy,f = fminsearch(fun,guess1,options)
+fun(f)
+dim = [0.7 0.65 .15 .15];
+str = sprintf('d=%.5f \n r=%4f \n K=%.2f', f(1),f(2),f(3));
+annotation('textbox',dim,'String',str)
 
 
 %%% Debugging Stuff: Uncomment if you want to see each individual spline

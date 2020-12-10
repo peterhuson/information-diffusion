@@ -3,7 +3,7 @@ file = "digg2009/votes_714.csv";
 votes = readmatrix(file);
 
 xes = [1 8];
-ts = [1 50];
+ts = [1 15];
 
 x = xes(1):xes(2);
 t = ts(1):ts(2);
@@ -13,8 +13,8 @@ Z = zeros(ts(2), xes(2));
 time_0 = votes(1,1);
 block = 1;
 for v = votes'
+    
     time_block = floor((v(1) - time_0) / (60 * 60)) + 1;
-
 %     if time_block > 0
 %         v
 %     end
@@ -37,22 +37,14 @@ populations = [populations(1) diff(populations)];
 % figure(1);
 % plot(x, populations(1:xes(2)));
 % [259 49014 1126905 2052095 2170024 2194024 2199247 2200477]
-
 % Z = bsxfun(@rdivide,Z,populations(1:xes(2)));
 
 % Normalize by the final number of exposed people:
 final_votes = Z(ts(2),:);
+% Z = bsxfun(@rdivide,Z, final_votes);
 
-Z = bsxfun(@rdivide,Z, final_votes);
-
-Z = exp(Z);
-Z(ts(1),:)
-% Z = Z .* 10000
-
-writematrix(Z, "Accuracy.txt");
-writematrix(X, "X.txt");
-writematrix(Y, "Y.txt");
-figure(2);
+% writematrix(Z, "Accuracy.txt")
+% figure(2);
 m = mesh(X,Y,Z,'FaceAlpha','0.5','FaceColor','flat');
 % set(gca,'ZScale','log');
 xlabel("x Friend Distance"); ylabel("t Hour"); zlabel("z Global Density");

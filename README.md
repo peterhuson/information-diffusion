@@ -9,4 +9,4 @@ Our main work includes:
 * Creating a Linear and Logistical Diffusive Model
 * Evaluating all models with respect to the most popular Digg story by fitting our parameters and calculating accuracy
 
-You can find the epidemiological model in the <tt>/epidemic folder</tt>, and the linear and logistic models in the <tt>/linear_logistic folder</tt>.
+You can find the epidemiological model in the <tt>/epidemic</tt> folder, and the linear and logistic models in the <tt>/linear_logistic</tt> folder.
